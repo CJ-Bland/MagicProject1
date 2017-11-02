@@ -1,4 +1,6 @@
-package server;
+package common;
+
+import common.CardType.Type;
 
 public class Card {
 

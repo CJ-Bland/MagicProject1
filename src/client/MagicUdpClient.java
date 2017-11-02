@@ -1,5 +1,5 @@
 package client;
 
-public class MagicUdpClient {
+public class MagicUdpClient extends AbstractMagicClient{
 
 }

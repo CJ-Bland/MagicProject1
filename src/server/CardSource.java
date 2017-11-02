@@ -5,10 +5,16 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class CardSource {
-	private static ArrayList<Card> deck = new ArrayList<>();
+import common.Card;
+import common.CardType;
 
-	public static void main(String[] args) throws FileNotFoundException{
+public class CardSource {
+	private ArrayList<Card> deck = new ArrayList<>();
+	private Scanner input;
+	private random generator;
+	private CardType type;
+
+	/*public static void main(String[] args) throws FileNotFoundException{
 
 		String line = "";
 		String filename = "src/server/cards.csv";					
@@ -33,7 +39,7 @@ public class CardSource {
 		}
 		
 		fileScanner.close();
-	}
+	}*/
 
 
 
