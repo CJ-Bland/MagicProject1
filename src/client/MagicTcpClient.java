@@ -2,8 +2,11 @@ package client;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.Scanner;
+
+import common.Card;
 
 
 public class MagicTcpClient extends AbstractMagicClient{
@@ -32,8 +35,21 @@ public class MagicTcpClient extends AbstractMagicClient{
 	 * print out the response. Make many assumptions.  Example purposes only!
 	 *
 	 * @throws IOException if something goes wrong with out socket.
+	 * @throws ClassNotFoundException 
 	 */
-	public void go() throws IOException {
+	public void go() throws IOException, ClassNotFoundException {
+		
+		 ObjectInputStream inFromServer = new ObjectInputStream(clientSocket.getInputStream());
+
+		 Card testCard = null;
+		 testCard = (Card) inFromServer.readObject();
+		 
+		 System.out.println(testCard.toString());
+		 
+		 inFromServer.close();
+		 clientSocket.close();
+		 
+		/*
 		// Create a 'stream' connected to the keyboard for user input.
 		Scanner scanIn = new Scanner(System.in);
 
@@ -57,14 +73,16 @@ public class MagicTcpClient extends AbstractMagicClient{
 		//}
 		clientSocket.close();                       // close the TCP connection.
 		clientIn.close();
+		*/
 	}
 
 
 	/**
 	 * Create the client, at a default port, and go.
 	 * @param args not used.
+	 * @throws ClassNotFoundException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ClassNotFoundException {
 
 		// localhost because the Server is running on the local machine. A 'client' and
 		// 'server' can run on the same host.

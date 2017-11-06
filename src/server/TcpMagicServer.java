@@ -2,10 +2,14 @@ package server;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
+
+import common.Card;
 
 public class TcpMagicServer {
 
@@ -35,17 +39,28 @@ public class TcpMagicServer {
 		// THIS IS NOT A VALID WAY TO WAIT FOR SOCKET CONNECTIONS!, You should
 		// not have a forever loop or while(true) 
 
-		//welcomeSocket.setSoTimeout(10000);
-		//DataOutputStream clientOut;
-		//Scanner clientIn;    	
-		//try{
-			//while(welcomeSocket.getSoTimeout()>0){
-				for (; ;) {
-				System.out.println("Waiting for client on port " +
-						welcomeSocket.getLocalPort() + "...");
-				// Accept a connection, and create a new 'direct' socket
-				// This socket has the same port as the welcome socket.
-				Socket connectionSocket = welcomeSocket.accept();
+		//while(welcomeSocket.getSoTimeout()>0){
+		for (; ;) {
+			System.out.println("Waiting for client on port " +
+					welcomeSocket.getLocalPort() + "...");
+			// Accept a connection, and create a new 'direct' socket
+			// This socket has the same port as the welcome socket.
+			Socket connectionSocket = welcomeSocket.accept();
+
+			ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
+            //ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
+
+            Card test = new Card("1", "Test", "CREATURE", "(10 mana)");
+            
+            outToClient.writeObject(test);
+            
+            DataOutputStream clientOut = new DataOutputStream(connectionSocket.getOutputStream());
+            clientOut.writeBytes("\n");
+            
+            outToClient.close();
+            clientOut.close();
+		}
+			/*
 
 				// create a Scanner (stream) connected to the client's socket
 				Scanner clientIn = new Scanner(connectionSocket.getInputStream());
@@ -58,6 +73,7 @@ public class TcpMagicServer {
 				// don't forget the newline, the client expects one!
 				String modLine = clientLine.toUpperCase();
 				String message = "";
+
 
 				if(modLine.equals("-A")){
 					message = "Will return 60 cards of all types";
@@ -73,34 +89,33 @@ public class TcpMagicServer {
 				}
 				else{
 					message = "Error, not an acceptable param";
-					break;
+					//break;
 				}
 
 				clientOut.writeBytes(message + "\n");
 				//clientIn.close();
 			}
-		/*}
-		catch(SocketTimeoutException stoe){
-			System.out.println("The server has timed out, please try again later");
-		}*/
+
+
 		//System.out.println("Exited loop" + "\n");
 		//clientIn.close();
-	}
-
-	/**
-	 * Main is a method that should be fully commented!
-	 *
-	 * @param args not used.
-	 */
-	public static void main(String[] args){
-
-		try {
-			TcpMagicServer server = new TcpMagicServer(6789);
-			server.go();
-		}
-		catch(IOException ioe) {
-			ioe.printStackTrace();
+			 */
 		}
 
+		/**
+		 * Main is a method that should be fully commented!
+		 *
+		 * @param args not used.
+		 */
+		public static void main(String[] args){
+
+			try {
+				TcpMagicServer server = new TcpMagicServer(6789);
+				server.go();
+			}
+			catch(IOException ioe) {
+				ioe.printStackTrace();
+			}
+
+		}
 	}
-}

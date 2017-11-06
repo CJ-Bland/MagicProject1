@@ -1,8 +1,10 @@
 package common;
 
+import java.io.Serializable;
+
 import common.CardType.Type;
 
-public class Card {
+public class Card implements Serializable{
 
 	  //Testing
     public String mana; 
@@ -23,6 +25,15 @@ public class Card {
         this.cardName = name;
         assignType(type);
         this.mana = mana;
+    }
+    
+    public Card(String id, String name, String type, String mana){
+    	short id1 = Short.parseShort(id);
+    	this.id = id1;
+        this.cardName = name;
+        assignType(type);
+        this.mana = mana;
+    	
     }
     
     public short getId(){
