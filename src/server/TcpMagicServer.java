@@ -35,12 +35,12 @@ public class TcpMagicServer {
 		// THIS IS NOT A VALID WAY TO WAIT FOR SOCKET CONNECTIONS!, You should
 		// not have a forever loop or while(true) 
 
-		welcomeSocket.setSoTimeout(10000);
+		//welcomeSocket.setSoTimeout(10000);
 		//DataOutputStream clientOut;
 		//Scanner clientIn;    	
-		try{
-			while(welcomeSocket.getSoTimeout()>0){
-				//for (; ;) {
+		//try{
+			//while(welcomeSocket.getSoTimeout()>0){
+				for (; ;) {
 				System.out.println("Waiting for client on port " +
 						welcomeSocket.getLocalPort() + "...");
 				// Accept a connection, and create a new 'direct' socket
@@ -79,10 +79,10 @@ public class TcpMagicServer {
 				clientOut.writeBytes(message + "\n");
 				//clientIn.close();
 			}
-		}
+		/*}
 		catch(SocketTimeoutException stoe){
 			System.out.println("The server has timed out, please try again later");
-		}
+		}*/
 		//System.out.println("Exited loop" + "\n");
 		//clientIn.close();
 	}
