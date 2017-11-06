@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import common.Card;
@@ -40,11 +41,18 @@ public class MagicTcpClient extends AbstractMagicClient{
 	public void go() throws IOException, ClassNotFoundException {
 		
 		 ObjectInputStream inFromServer = new ObjectInputStream(clientSocket.getInputStream());
+		 DataOutputStream toServer = new DataOutputStream(clientSocket.getOutputStream());
+		 toServer.writeBytes("-sl" + "\n");       // write to the server
+			
 
-		 Card testCard = null;
-		 testCard = (Card) inFromServer.readObject();
+
+		 ArrayList<Card> testCard = null;
+		 testCard = (ArrayList<Card>) inFromServer.readObject();
 		 
-		 System.out.println(testCard.toString());
+		 //System.out.println(testCard.toString());
+		 for(int i = 0; i<testCard.size(); i++){
+			 System.out.println(testCard.get(i));
+		 }
 		 
 		 inFromServer.close();
 		 clientSocket.close();

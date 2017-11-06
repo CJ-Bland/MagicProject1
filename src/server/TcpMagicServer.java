@@ -7,14 +7,17 @@ import java.io.ObjectOutputStream;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import common.Card;
+import common.CardType;
 
-public class TcpMagicServer {
+public class TcpMagicServer extends AbstractMagicServer{
 
 	/** Listen for clients knocking at the door (port) */
 	ServerSocket welcomeSocket;
+	
 
 	/**
 	 * Create a Server with a listening socket to accept client connections
@@ -29,12 +32,10 @@ public class TcpMagicServer {
 	}
 
 	/**
-	 * Accept connections from clients, Get data they send and send it back
-	 * modified. Makes MANY assumptions. -- <b>For example puposes only!</b>
-	 *
-	 * @throws IOException if we have problems with our sockets.
+	 * Listens to requests from clients
+	 * @throws IOException 
 	 */
-	public void go() throws IOException {
+	public void listen() throws IOException {
 
 		// THIS IS NOT A VALID WAY TO WAIT FOR SOCKET CONNECTIONS!, You should
 		// not have a forever loop or while(true) 
@@ -48,19 +49,42 @@ public class TcpMagicServer {
 			Socket connectionSocket = welcomeSocket.accept();
 
 			ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
-            //ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
+			Scanner clientIn = new Scanner(connectionSocket.getInputStream());
+			String clientLine = clientIn.nextLine();
+			System.out.println(clientLine);
 
-            Card test = new Card("1", "Test", "CREATURE", "(10 mana)");
-            
-            outToClient.writeObject(test);
-            
-            DataOutputStream clientOut = new DataOutputStream(connectionSocket.getOutputStream());
-            clientOut.writeBytes("\n");
-            
-            outToClient.close();
-            clientOut.close();
+			CardSource test = new CardSource();
+			ArrayList<Card> deck = null;
+			//Card card = new Card("1", "Name", "Spell", "Mana");
+			//deck = test.makeDeck(60, null);
+			setCardsReturned(clientLine);
+			deck = test.makeDeck(getItemToSend(), getTypes());
+			
+			/*if(clientLine.toUpperCase().equals("-A")){
+				deck = test.makeDeck(60, null);
+			}
+			else if(clientLine.toUpperCase().equals("-L")){
+				deck = test.makeDeck(20, CardType.Type.LAND);
+			}
+			else if(clientLine.toUpperCase().equals("-C")){
+				deck = test.makeDeck(20, CardType.Type.CREATURE);
+			}
+			else if(clientLine.toUpperCase().equals("-S")){
+				deck = test.makeDeck(20, CardType.Type.SPELL);
+			}
+			else {
+				deck = test.makeDeck(20, CardType.Type.UNKNOWN);
+			}*/
+
+			outToClient.writeObject(deck);
+
+			DataOutputStream clientOut = new DataOutputStream(connectionSocket.getOutputStream());
+			clientOut.writeBytes("\n");
+
+			//outToClient.close();
+			//clientOut.close();
 		}
-			/*
+		/*
 
 				// create a Scanner (stream) connected to the client's socket
 				Scanner clientIn = new Scanner(connectionSocket.getInputStream());
@@ -99,23 +123,23 @@ public class TcpMagicServer {
 
 		//System.out.println("Exited loop" + "\n");
 		//clientIn.close();
-			 */
-		}
-
-		/**
-		 * Main is a method that should be fully commented!
-		 *
-		 * @param args not used.
 		 */
-		public static void main(String[] args){
-
-			try {
-				TcpMagicServer server = new TcpMagicServer(6789);
-				server.go();
-			}
-			catch(IOException ioe) {
-				ioe.printStackTrace();
-			}
-
-		}
 	}
+
+	/**
+	 * Main is a method that should be fully commented!
+	 *
+	 * @param args not used.
+	 */
+	public static void main(String[] args){
+
+		try {
+			TcpMagicServer server = new TcpMagicServer(6789);
+			server.listen();
+		}
+		catch(IOException ioe) {
+			ioe.printStackTrace();
+		}
+
+	}
+}
