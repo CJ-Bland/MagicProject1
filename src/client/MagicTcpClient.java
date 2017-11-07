@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
+//import java.util.Scanner;
 
 import common.Card;
 
@@ -38,11 +38,12 @@ public class MagicTcpClient extends AbstractMagicClient{
 	 * @throws IOException if something goes wrong with out socket.
 	 * @throws ClassNotFoundException 
 	 */
+	@SuppressWarnings("unchecked")
 	public void go() throws IOException, ClassNotFoundException {
 		
 		 ObjectInputStream inFromServer = new ObjectInputStream(clientSocket.getInputStream());
 		 DataOutputStream toServer = new DataOutputStream(clientSocket.getOutputStream());
-		 toServer.writeBytes("-sl" + "\n");       // write to the server
+		 toServer.writeBytes("-a" + "\n");       // write to the server
 			
 
 

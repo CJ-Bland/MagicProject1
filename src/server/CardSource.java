@@ -80,6 +80,7 @@ public class CardSource {
 		input.close();
 	}
 
+	//This method takes the place of next for udp
 	public ArrayList<Card> makeDeck(int size, ArrayList<CardType.Type> subtype){
 		
 		//System.out.println(subtype.get(0));
@@ -125,7 +126,7 @@ public class CardSource {
 
 		ArrayList<Card> ran = new ArrayList();
 		//int size = 20;
-		System.out.println(subdeck.size());
+		//System.out.println(subdeck.size());
 		
 		for(int i = 0; i<size; i++){			
 			int random = generator.nextInt(subdeck.size());

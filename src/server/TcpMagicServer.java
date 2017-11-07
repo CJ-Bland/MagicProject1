@@ -58,23 +58,9 @@ public class TcpMagicServer extends AbstractMagicServer{
 			//Card card = new Card("1", "Name", "Spell", "Mana");
 			//deck = test.makeDeck(60, null);
 			setCardsReturned(clientLine);
-			deck = test.makeDeck(getItemToSend(), getTypes());
 			
-			/*if(clientLine.toUpperCase().equals("-A")){
-				deck = test.makeDeck(60, null);
-			}
-			else if(clientLine.toUpperCase().equals("-L")){
-				deck = test.makeDeck(20, CardType.Type.LAND);
-			}
-			else if(clientLine.toUpperCase().equals("-C")){
-				deck = test.makeDeck(20, CardType.Type.CREATURE);
-			}
-			else if(clientLine.toUpperCase().equals("-S")){
-				deck = test.makeDeck(20, CardType.Type.SPELL);
-			}
-			else {
-				deck = test.makeDeck(20, CardType.Type.UNKNOWN);
-			}*/
+			//make deck takes the place of next for connections
+			deck = test.makeDeck(getItemToSend(), getTypes());						
 
 			outToClient.writeObject(deck);
 
@@ -83,47 +69,9 @@ public class TcpMagicServer extends AbstractMagicServer{
 
 			//outToClient.close();
 			//clientOut.close();
-		}
-		/*
-
-				// create a Scanner (stream) connected to the client's socket
-				Scanner clientIn = new Scanner(connectionSocket.getInputStream());
-				DataOutputStream clientOut = new DataOutputStream(connectionSocket.getOutputStream());
-
-				// read from the socket
-				String clientLine = clientIn.nextLine();
-
-				// modify the data and send it back though the socket.
-				// don't forget the newline, the client expects one!
-				String modLine = clientLine.toUpperCase();
-				String message = "";
-
-
-				if(modLine.equals("-A")){
-					message = "Will return 60 cards of all types";
-				}
-				else if(modLine.equals("-L")){
-					message = "Will return 20 cards of Land type";
-				}
-				else if(modLine.equals("-C")){
-					message = "Will return 20 cards of Creature type";
-				}
-				else if(modLine.equals("-S")){
-					message = "Will return 20 cards of Spell type";
-				}
-				else{
-					message = "Error, not an acceptable param";
-					//break;
-				}
-
-				clientOut.writeBytes(message + "\n");
-				//clientIn.close();
-			}
-
-
-		//System.out.println("Exited loop" + "\n");
-		//clientIn.close();
-		 */
+		}		
+		
+		//clientIn.close();		 
 	}
 
 	/**

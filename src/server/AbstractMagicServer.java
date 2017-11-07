@@ -20,7 +20,7 @@ public abstract class AbstractMagicServer {
 	protected CardSource getSource(){
 		return source;
 	}
-	
+
 	protected ArrayList<CardType.Type> getTypes(){
 		return types;
 	}
@@ -39,25 +39,34 @@ public abstract class AbstractMagicServer {
 
 	protected void setCardsReturned(String command){
 		String flag = command.toUpperCase();
+		//System.out.println(flag);
+
 		if(types.size()!= 0){
 			types.clear();
 		}
+
 		if(flag.equals("-A")){
+		//if(flag.startsWith("-A")){
 			numItems = 60;
-			//source.setCardType(null);
+			//Chose to set type to artifact, instead of adding 3 types, in 
+			//make deck will check for artifact type and then choose only
+			//creature land and spell, since artifact is not used
 			types.add(CardType.Type.ARTIFACT);
 		}
-		else if(flag.equals("-L")){
+		//else if(flag.equals("-L")){
+		else if(flag.startsWith("-L")){
 			numItems = 20;	
 			types.add(CardType.Type.LAND);
 			//source.setCardType(CardType.Type.LAND);
 		}
-		else if (flag.equals("-S")){
+		//else if (flag.equals("-S")){
+		else if (flag.startsWith("-S")){
 			numItems = 20;	
 			types.add(CardType.Type.SPELL);
 			//source.setCardType(CardType.Type.SPELL);
 		}
-		else if (flag.equals("-C")){
+		//else if (flag.equals("-C")){
+		else if (flag.startsWith("-C")){
 			numItems = 20;	
 			types.add(CardType.Type.CREATURE);
 			//source.setCardType(CardType.Type.CREATURE);
@@ -77,6 +86,8 @@ public abstract class AbstractMagicServer {
 			types.add(CardType.Type.CREATURE);
 			types.add(CardType.Type.SPELL);
 		}
+
+		
 
 	}
 
