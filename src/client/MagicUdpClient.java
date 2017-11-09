@@ -10,118 +10,89 @@ import common.Card;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.PrintStream;
 
+/**
+ * MagicTcpClient is a class that extends AbstractMagicClient and provides 
+ * a concrete implementation of the printToStream() method using UDP. Data 
+ * received from the remote host is printed to the specified PrintStream.
+ * @author CJ and Vanessa
+ *  */
 public class MagicUdpClient extends AbstractMagicClient{
 
-	private DatagramSocket clientSocket;    
+	/** The socket that will be used to send data to the server*/
+	private DatagramSocket clientSocket;
+
+	/** The address of the server*/
+	private InetAddress host;
+
+	/** The port number on the server*/
+	private int port;
 
 	/**
-	 * Creates client with a DatagramSocket
+	 * Creates client with a DatagramSocket and initialized the fields using
+	 * the given parameters
 	 *
-	 * @throws IOException if we cannot create a socket.
+	 * @throws IOException if we can't make a socket.
+	 * 
+	 * @param host the address of the server
+	 * @param port the port number of the server
+	 * @param flag the flag which tells the server how many cards to send and 
+	 * 	of what type 
 	 */
-	public MagicUdpClient() throws IOException {
-		// Does not initiate a TCP connection. The host does NOT contact the
-		// server, hence the lack of hostname or port number. It creates 
-		// a 'door' not a 'pipe'.
+	public MagicUdpClient(InetAddress host, int port, String flag) throws IOException {	
+		super(host, port, flag);
+
 		clientSocket = new DatagramSocket();
+		this.host = host;
+		this.port = port;
 	}
 
 	/**
-	 * Get some information from the user, send it to a server, get a
-	 * response, and then print out the response. Make many assumptions.
-	 * Example purposes only!
-	 *
-	 * @throws IOException if something goes wrong with out socket.
-	 * @throws ClassNotFoundException 
+	 * Sends the flag to the server, receives the cards, and prints
+	 * them out to the screen
 	 */
-	public void go(String host, int port) throws IOException, ClassNotFoundException {
+	public void printToStream(PrintStream out) {
 
-		/*Scanner     scanIn      = new Scanner(System.in);  
+		try{		
+			String sendLine = getFlag();		
+			byte[]      sendData    = new byte[1024];
+			sendData = sendLine.getBytes();
+			DatagramPacket sendPacket = new DatagramPacket(sendData, 
+					sendData.length,
+					host, port);
 
-	        System.out.print("Enter a sentence to send to the server >");
-	        String sendLine = scanIn.nextLine();           // data from user
-		 */
-		String sendLine = "-s";
-		// Holds data to send to the client, byte is a primitive type that 
-		// holds a byte, surprisingly enough :)
-		byte[]      sendData    = new byte[1024];
-
-		// Invoke a DNS query that translates the hostname into an IP address.
-		InetAddress IPAddress   = InetAddress.getByName(host);
-
-		// Convert a string into a byte array
-		sendData = sendLine.getBytes();
-
-		// Construct the packet to push through the socket: Data, the length
-		// of the data, the Dest IP address and the port number.
-		DatagramPacket sendPacket = new DatagramPacket(sendData, 
-				sendData.length,
-				IPAddress, port);
-
-		// Push the data into the socket.
-		clientSocket.send(sendPacket);
-		byte[] data;
-
-		// Create storage to receive a packet from the server.
-		byte[] receiveData = new byte[1024];
-		DatagramPacket receivePacket = new DatagramPacket(receiveData,
-				receiveData.length);
-
-		// The client idles until it receives data from the server.
-		clientSocket.receive(receivePacket);	        	      
-		data = receivePacket.getData();
-
-		do{
-
-
-			//System.out.println(data.toString());
-
-			ByteArrayInputStream in = new ByteArrayInputStream(data);
-			ObjectInputStream is = new ObjectInputStream(in);
-			try {
-				Card card = (Card) is.readObject();
-				System.out.println(card.toString());
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			// Create storage to receive a packet from the server.
-			receiveData = new byte[1024];
-			receivePacket = new DatagramPacket(receiveData,
+			clientSocket.send(sendPacket);
+			//byte[] data;
+			byte[] receiveData = new byte[1024];
+			DatagramPacket receivePacket = new DatagramPacket(receiveData,
 					receiveData.length);
-
-			// The client idles until it receives data from the server.
 			clientSocket.receive(receivePacket);	        	      
-			data = receivePacket.getData();
-		}
-		while(data.length!=0);		
+			byte[] data = receivePacket.getData();
 
-		/*receiveData = new byte[1024];
-			receivePacket = new DatagramPacket(receiveData,
-					receiveData.length);
-			clientSocket.receive(receivePacket);
-			data = receivePacket.getData();
-			System.out.println(data.toString());
-			in = new ByteArrayInputStream(data);
-			is = new ObjectInputStream(in);
-			try {
-				Card card = (Card) is.readObject();
-				System.out.println("Card:" + card.toString());
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+			do{
+				ByteArrayInputStream in = new ByteArrayInputStream(data);
+				ObjectInputStream is = new ObjectInputStream(in);
+
+				try {
+					Card card = (Card) is.readObject();
+					System.out.println(card.toString());
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+				receiveData = new byte[1024];
+				receivePacket = new DatagramPacket(receiveData,
+						receiveData.length);
+
+				clientSocket.receive(receivePacket);	        	      
+				data = receivePacket.getData();
 			}
-		}	*/	
-		clientSocket.close(); 
-	}
+			while(receivePacket.getLength()!=0);		
 
-	public static void main(String[] args) throws ClassNotFoundException {
-
-		try {
-			MagicUdpClient client = new MagicUdpClient();
-			client.go("localhost", 9876);
-		} 
-		catch (IOException ioe ) {
-			ioe.printStackTrace();
+			clientSocket.close(); 		
+		} catch (IOException e) {
+			System.out.println("I/O Exception, Can not create Socket, Try Again");
+			System.exit(1);
 		}
 	}
 }

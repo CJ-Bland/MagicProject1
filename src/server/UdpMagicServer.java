@@ -1,126 +1,101 @@
 package server;
 
 import java.util.ArrayList;
-import java.util.Scanner;
+//import java.util.Scanner;
 
 import common.Card;
 
-import java.io.ByteArrayInputStream;
+//import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+//import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
+/**
+ * a class that extends AbstractMagicServer and provides a concrete implementation 
+ * of the listen() method using UDP. The method repeatedly waits for a datagram 
+ * from a client and responds appropriately
+ * 
+ * @author CJ and Vanessa
+ */
 public class UdpMagicServer extends AbstractMagicServer{
 
-	/** Socket to the known universe (A.K.A. The Internet). */
+	/** Socket to connect to anything that contacts us */
 	private DatagramSocket serverSocket; 
 
-
 	/**
-	 * Create a Server with a socket.
+	 * Constructor to create a socket.
 	 *
 	 * @param port port where the server is listening
-	 *
+	 * 
+	 * @throws SocketException if something goes wrong with the socket
 	 * @throws IOException if we cannot create a socket.
 	 */
-	public UdpMagicServer(int port) throws IOException {
-		/* 
-		 * Note there is no listening socket, just a nice all purpose socket through which
-		 * data, from possibly multiple different clients, will come through.
-		 */
+	public UdpMagicServer(int port) throws SocketException{
+		super(port);		
 		serverSocket = new DatagramSocket(port);
 	}
 
 	/**
-	 * Get data from a client, modify it and send it back modified. Makes MANY assumptions. --
-	 * example puposes only!
-	 *
-	 * @throws IOException if we have problems with our sockets.
+	 * Listens for a connection from a client, gets a datagram packet, gets
+	 * the flag out of it, sends that flag to the abstractMagicServer class,
+	 * gets a deck of randomly selected cards that fit the criteria of the 
+	 * flag, and sends that deck card by card back to the client
+	 * 
+	 * @throws MagicServerException 
+	 * @throws IOException if we have issues with the sockets.
 	 */
-	public void go() throws IOException {
-		boolean checker = true;
-		int cards = 0;
-		//for (; ;) { // SADNESS :(
-		while(checker){
-			//Card card = new Card("1", "Name", "Spell", "Mana");
-
-			// create a packet to get some tasty data.
-			byte[] receiveData = new byte[1024];
-
-			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-
-			// get some data through the socket
-			serverSocket.receive(receivePacket);
-
-			// change the data portion byte array, into a string, I assume that this is legal.
-			String clientLine = new String(receivePacket.getData());
-			//System.out.println(clientLine);
-
-			CardSource test = new CardSource();			
-			setCardsReturned(clientLine);
-			//System.out.println(getItemToSend() + " "+ getTypes().toString());
-			ArrayList<Card> deck = null;
-			deck= test.makeDeck(getItemToSend(), getTypes());
-
-			/*for(int i = 0; i<deck.size(); i++){
-				System.out.println(deck.get(i));
-			}*/
-			//System.out.println(deck.size());
-
-
-			//byte[] data = receivePacket.getData();
-
-			//ByteArrayInputStream in = new ByteArrayInputStream(data);
-			//ObjectInputStream is = new ObjectInputStream(in);
-
-			InetAddress IPAddress = receivePacket.getAddress();
-			int port = receivePacket.getPort();
-
-			byte[] incomingData = new byte[1024];
-			//Card card = (Card) is.readObject();				
+	public void listen() throws MagicServerException{		
+		try{
+			//Keeps the server alive for 10 minutes. The try block also works as a checker, so
+			//there are no forever loops
+			serverSocket.setSoTimeout(600000); 
 			
-			for(int i = 0; i<deck.size(); i++){
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				ObjectOutputStream os = new ObjectOutputStream(outputStream);
-				os.writeObject(deck.get(i));			
+			while(serverSocket.getSoTimeout()>0){				
+				byte[] receiveData = new byte[1024];
 
-				byte[] data = outputStream.toByteArray();
-				DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, port /*9876*/);			
+				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+				serverSocket.receive(receivePacket);
+				String clientLine = new String(receivePacket.getData());
+				
+				CardSource test = new CardSource();			
+				setCardsReturned(clientLine);
+				
+				ArrayList<Card> deck = null;
+				deck= test.makeDeck(getItemToSend(), getTypes());
+
+				InetAddress IPAddress = receivePacket.getAddress();
+				int port = receivePacket.getPort();
+				
+				for(int i = 0; i<deck.size(); i++){
+					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+					ObjectOutputStream os = new ObjectOutputStream(outputStream);
+					os.writeObject(deck.get(i));			
+
+					byte[] data = outputStream.toByteArray();
+					DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, port /*9876*/);			
+					serverSocket.send(sendPacket);				
+				}
+
+				//sending empty packet so the client knows its over
+				byte[] end = new byte[0];
+				DatagramPacket sendPacket = new DatagramPacket(end, 0, IPAddress, port /*9876*/);			
 				serverSocket.send(sendPacket);
-				//System.out.println("Sent:" + deck.get(i).toString());
-				cards++;
+
 			}
-			if(cards == deck.size()){
-				checker = false;
-			}
-			//sending empty packet so the client knows its over
-			byte[] end = new byte[0];
-			DatagramPacket sendPacket = new DatagramPacket(end, 0, IPAddress, port /*9876*/);			
-			serverSocket.send(sendPacket);
-			
-			// Modify the data and send it back though the socket.
-			/*String modLine  = clientLine.toUpperCase();
-			byte[] sendData = modLine.getBytes();
-
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 
-					port);
-			serverSocket.send(sendPacket);	  */          
+		}catch(SocketException e){
+			System.out.println("SocketException, please restart");
 		}
-	}
-
-	public static void main(String[] args){
-
-		try {
-			UdpMagicServer server = new UdpMagicServer(9876);
-			server.go();
+		catch(SocketTimeoutException ste){
+			throw new MagicServerException("SocketTimeOutException, socket timed out, please restart");						
 		}
-		catch(IOException ioe) {
-			ioe.printStackTrace(); // Only for debugging purposes. Remove these and put nice
-			// informative error messages.
-		}
+		catch(IOException ioe){
+			System.out.println("IOException, please try again");
+		}				
 	}
 }
