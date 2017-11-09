@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
  * The entry point of the application 
  * @author CJ and Vanessa
  */
-public class MagicClientDriver {
+public class MagicClientDriver{
 
 	/**The program must accept either two, three, or four Command Line 
 	 * Arguments (CLA)s. The first CLA must be either the string “TCP” or 
